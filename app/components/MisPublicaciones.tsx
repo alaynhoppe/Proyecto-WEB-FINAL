@@ -126,18 +126,27 @@ const MisPublicaciones = ({ user }) => {
     e.preventDefault()
     if (!validateForm()) return
 
-    const allPublicaciones = JSON.parse(localStorage.getItem("uleam_publicaciones") || "[]")
-    const newPublication = {
-      id: editingPublication ? editingPublication.id : Date.now(),
-      ...formData,
-      autorId: user.id,
-      autorNombre: user.name,
-      fechaCreacion: editingPublication ? editingPublication.fechaCreacion : new Date().toISOString(),
-      fechaModificacion: new Date().toISOString(),
-      validado: false,
-      archivoUrl: formData.archivo ? `uploads/${Date.now()}_${formData.archivoNombre}` : null,
-    }
+   // Mantener archivo anterior si no se sube uno nuevo
+let archivoUrl = editingPublication?.archivoUrl || null
+let archivoNombre = editingPublication?.archivoNombre || ""
 
+if (formData.archivo) {
+  archivoUrl = `uploads/${Date.now()}_${formData.archivoNombre}`
+  archivoNombre = formData.archivoNombre
+}
+
+const newPublication = {
+  id: editingPublication ? editingPublication.id : Date.now(),
+  ...formData,
+  archivo: undefined, // No guardar el objeto File en localStorage
+  archivoUrl,
+  archivoNombre,
+  autorId: user.id,
+  autorNombre: user.name,
+  fechaCreacion: editingPublication ? editingPublication.fechaCreacion : new Date().toISOString(),
+  fechaModificacion: new Date().toISOString(),
+  validado: false,
+}
     if (editingPublication) {
       const index = allPublicaciones.findIndex((p) => p.id === editingPublication.id)
       allPublicaciones[index] = newPublication
